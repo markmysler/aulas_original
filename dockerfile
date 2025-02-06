@@ -1,9 +1,7 @@
-FROM python:3
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1
-WORKDIR /code
-COPY requirements.txt /code/
-RUN pip install -r requirements.txt
-COPY . /code/
-RUN python manage.py collectstatic --noinput
+FROM python:3.6
+WORKDIR /app
+COPY requirements.txt /app/
+COPY .env /app/
+RUN pip install -r /app/requirements.txt
+COPY . /app/
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

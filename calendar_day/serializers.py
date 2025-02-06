@@ -5,10 +5,9 @@ class CalendarBlockSerializer(serializers.ModelSerializer):
         model=CalendarBlock
         fields=(
             'aula_id',
-            'month',
-            'date_num',
-            'week_day',
-            'timeblock',
+            'date'
+            'start_time',
+            'end_time',
             'reservation_id',
             'reservation_title',
         )

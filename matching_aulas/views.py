@@ -31,27 +31,18 @@ class MatchingAulasView(generics.ListAPIView):
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
         frequency = self.request.query_params.get('frequency')
-        times = self.request.query_params.get('times')
-
-        if not times:
-            raise ValidationError("Times cannot be empty")
-        else:
-            # Convert the times string to a list
-            times = times.split(',')
+        start_time = self.request.query_params.get('start_time')
+        end_time = self.request.query_params.get('end_time')
         
         # List of parameters
-        params = ['capacity', 'has_negatoscope', 'has_screen', 'start_date', 'end_date', 'frequency', 'times']
+        params = ['capacity', 'has_negatoscope', 'has_screen', 'start_date', 'end_date', 'frequency', 'start_time', 'end_time']
 
         # Check if the required parameters are present
         missing_params = [param for param in params if self.request.query_params.get(param) is None]
         if missing_params:
             raise ValidationError(f"Required parameters are missing: {', '.join(missing_params)}")
     
-        # Remove 'T00:00:00' from the start_date and end_date strings
-        if start_date.endswith('T00:00:00'):
-            start_date = start_date[:-9]
-        if end_date.endswith('T00:00:00'):
-            end_date = end_date[:-9]
+       
         
         # Convert the start_date and end_date strings to date objects
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
@@ -87,14 +78,13 @@ class MatchingAulasView(generics.ListAPIView):
         # Prepare the dates and times for the query
         dates = []
         while current_date <= end_date:
-            for time_slot in times:
-                dates.append((current_date.day, current_date.month, time_slot))
+            dates.append((current_date, start_time, end_time))
             current_date += frequency_map.get(frequency, timedelta(1))
 
         q_objects = Q()
 
-        for day, month, time_slot in dates:
-            q_objects |= Q(date_num=day, month=month, timeblock=time_slot)
+        for date, start_time, end_time in dates:
+            q_objects |= Q(date=date, start_time=start_time, end_time=end_time)
 
         conflicting_blocks = CalendarBlock.objects.filter(q_objects)
         

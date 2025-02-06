@@ -11,6 +11,7 @@ from django.http import Http404
 from datetime import datetime
 from django.db.models import Q
 from rest_framework.decorators import action
+from datetime import date
 
 class ReservationViewSet(viewsets.ModelViewSet):
     permission_classes=[permissions.IsAuthenticated]
@@ -20,9 +21,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def partial_delete(self, request, pk=None):
         reservation = self.get_object()
-        date_num = int(request.data.get('date_num'))
-        month = int(request.data.get('month'))
-        calendar_blocks = CalendarBlock.objects.filter(date_num = date_num, month = month, reservation_id = reservation.id)
+        date = date(request.data.get('date'))
+        calendar_blocks = CalendarBlock.objects.filter(date=date, reservation_id = reservation.id)
         len_calendar_blocks = len(calendar_blocks)
         calendar_blocks.delete()
         print(request.data)
@@ -31,13 +31,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        
-        current_month= datetime.now().month
-        current_day= datetime.now().day
+
         
         # Filter CalendarBlock objects where month is the same and date_num is equal or greater than current day
         calendar_blocks = CalendarBlock.objects.filter(
-            (Q(month=current_month, date_num__gte=current_day) | Q(month__gt=current_month)),
             reservation_id=instance.id,
         )
         

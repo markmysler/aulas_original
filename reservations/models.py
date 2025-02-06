@@ -1,29 +1,26 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import timedelta
+from datetime import timedelta, date
 from django.db import transaction
 from aulas.models import Aula
 from dateutil.relativedelta import relativedelta
-
+from django.utils import timezone
 # Create your models here.
 
 class Reservation(models.Model):
     aula_id = models.ForeignKey(Aula, related_name='reservations', on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, related_name='reservations', on_delete=models.CASCADE)
-    user_category = models.CharField(
-        max_length=255,
-        blank=False,
-        null=False
-    )
-    start_date = models.DateTimeField(null=False, blank=False)
-    end_date = models.DateTimeField(null=False, blank=False)
+    start_date = models.DateField(null=False, blank=False, default=date.today())
+    end_date = models.DateField(null=False, blank=False, default=date.today())
     frequency = models.CharField(
         max_length=255,
         blank=False,
         null=False
     )
-    times = models.TextField(max_length=255, null=False, blank=False)
+    start_time = models.TimeField(null=False, blank=False, default=timezone.now().time())
+    end_time = models.TimeField(null=False, blank=False, default=timezone.now().time())
     title = models.TextField(max_length=255, null=False, blank=False)
+    reserved_for = models.TextField(max_length=255, null=False, blank=False, default="")
     
     def __str__(self):
         return f"{self.title} de {self.user_id}"
@@ -36,9 +33,6 @@ class Reservation(models.Model):
         # Calculate the start and end dates
         start_date = self.start_date
         end_date = self.end_date
-
-        # Split the times string into a list
-        times = self.times.split(',')
 
         # Create a list to hold all the dates
         dates = []
@@ -64,15 +58,12 @@ class Reservation(models.Model):
             # For each date in the dates list
             for date in dates:
                 if date.weekday() != 6:
-                    # For each time in the times list
-                    for time in times:
-                        # Create a new CalendarBlock object
-                        CalendarBlock.objects.create(
-                            aula_id=self.aula_id,
-                            month=date.month,
-                            date_num=date.day,
-                            week_day=date.weekday(),
-                            timeblock=time,
-                            reservation_id=self,
-                            reservation_title=self.title
-                        )
+                    # Create a new CalendarBlock object
+                    CalendarBlock.objects.create(
+                        aula_id=self.aula_id,
+                        date=date,
+                        start_time=self.start_time,
+                        end_time=self.end_time,
+                        reservation_id=self,
+                        reservation_title=self.title
+                    )

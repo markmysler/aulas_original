@@ -11,26 +11,32 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
+# reading .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wkkeimd7-cgg@!+t)557#c--rkd)u3c@_k@r+mpfh)!#o7te4a'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['hgajaf.com.ar', 'www.hgajaf.com.ar']
-
+# ALLOWED_HOSTS = ['hgajaf.com.ar', 'www.hgajaf.com.ar']
+ALLOWED_HOSTS = ['*']
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -56,7 +62,7 @@ INSTALLED_APPS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-        'http://localhost:8080','https://hgajaf.com.ar', 'https://www.hgajaf.com.ar', 'https://aulas-fernandez.vercel.app'
+        "http://localhost:8000", "http://localhost:80"
 ]
 
 CORS_ALLOW_METHODS = [
@@ -72,8 +78,8 @@ CORS_ALLOW_METHODS = [
 CORS_ALLOW_HEADERS = ['content-type', 'accept', 'X-CSRFToken', 'Authorization', 'accept-encoding', 'dnt','origin','user-agent','x-requested-with']
 # CORS_ORIGIN_ALLOW_ALL=True
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ['https://www.hgajaf.com.ar', 'https://hgajaf.com.ar', 'https://aulas-fernandez.vercel.app']
-CSRF_COOKIE_DOMAIN = '.hgajaf.com.ar'
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://localhost:80"]
+CSRF_COOKIE_DOMAIN = 'localhost'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -113,11 +119,11 @@ WSGI_APPLICATION = 'aulas_back.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'aulas_fernandez_db',
-        'USER': 'aulas_fernandez_user',
-        'PASSWORD': 'aulas_fernandez_password',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': env("POSTGRES_DB"),
+        'USER': env("POSTGRES_USER"),
+        'PASSWORD': env("POSTGRES_PASSWORD"),
+        'HOST': env("DATABASE_HOST"),
+        'PORT': env("DATABASE_PORT"),
     }
 }
 
@@ -145,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
 
@@ -155,13 +161,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-STATIC_ROOT= BASE_DIR / 'static/'
-
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media/'
-
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
