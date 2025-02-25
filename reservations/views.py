@@ -21,12 +21,15 @@ class ReservationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def partial_delete(self, request, pk=None):
         reservation = self.get_object()
-        date = date(request.data.get('date'))
-        calendar_blocks = CalendarBlock.objects.filter(date=date, reservation_id = reservation.id)
-        len_calendar_blocks = len(calendar_blocks)
-        calendar_blocks.delete()
-        print(request.data)
-        return Response({'message': f'Successfully deleted {len_calendar_blocks} calendar block(s)'}, status=status.HTTP_200_OK)
+        try:
+            date_str = request.data.get('date')
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+            calendar_blocks = CalendarBlock.objects.filter(date=date_obj, reservation_id=reservation.id)
+            len_calendar_blocks = len(calendar_blocks)
+            calendar_blocks.delete()
+            return Response({'message': f'Successfully deleted {len_calendar_blocks} calendar block(s)'}, status=status.HTTP_200_OK)
+        except (ValueError, TypeError) as e:
+            return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
     
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -37,10 +40,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         calendar_blocks = CalendarBlock.objects.filter(
             reservation_id=instance.id,
         )
-        
         # Serialize the CalendarBlock objects
         calendar_block_serializer = CalendarBlockSerializer(calendar_blocks, many=True)
-        
         # Add the serialized CalendarBlock objects to the response
         response = Response({
             'reservation': serializer.data,

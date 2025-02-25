@@ -31,21 +31,21 @@ services:
     networks:
       - internal
 
-  frontend:
-    build:
-      context: ./AulasFront2
-      dockerfile: ../dockerfile.front
-    volumes:
-      - static_volume:/usr/share/nginx/html/static
-      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
-    ports:
-      - '80:80'
+  # frontend:
+  #   build:
+  #     context: ./AulasFront2
+  #     dockerfile: ../dockerfile.front
+  #   volumes:
+  #     - static_volume:/usr/share/nginx/html/static
+  #     - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
+  #   ports:
+  #     - '80:80'
 
-    depends_on:
-      - api
-    networks:
-      - internal
-      - external
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - internal
+  #     - external
 
 volumes:
   postgres_data:

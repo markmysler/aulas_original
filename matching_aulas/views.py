@@ -51,6 +51,9 @@ class MatchingAulasView(generics.ListAPIView):
         # Make the start_date and end_date timezone-aware
         start_date = timezone.make_aware(datetime.combine(start_date, time()))
         end_date = timezone.make_aware(datetime.combine(end_date, time()))
+        
+        start_time = datetime.strptime(start_time, "%H:%M").time()
+        end_time = datetime.strptime(end_time, "%H:%M").time()
 
         # Map frequencies to their corresponding timedelta arguments
         frequency_map = {
